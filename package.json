@@ -1,0 +1,15 @@
+{
+  "name": "httpregister",
+  "version": "1.0.0",
+  "description": "experiement service worker and caching ( try to navigate in browser [ offline mode ] )",
+  "main": "mains.js",
+  "scripts": {
+    "test": "echo \"Error: no test specified\" && exit 1" ,
+    "parcel::server" :"./node_modules/.bin/parcel index.html"
+  },
+  "author": "juko",
+  "license": "MIT",
+  "dependencies": {
+    "parcel": "^1.9.7"
+  }
+}
