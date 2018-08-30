@@ -6,10 +6,7 @@
  * 3 - on Fetch 
  */
 
-const CACHE_NAME ="" 
-
-const CURRENT_CACHE_ASSETS = new Set([])
-
+const CACHE_NAME ="Sw::Cv"
 
 let {
 
@@ -21,21 +18,56 @@ let {
     On_install (){
     
      self.addEventListener("install" ,evt =>{
-     
-
-        
+       
+         /*evt.waitUntil(
+             caches
+             .open(CACHE_NAME) 
+             .then(cache_name => {
+              cache_name.addAll(CURRENT_CACHE_ASSETS)
+             })
+         )*/
      })
     } , 
 
     On_active (){
     
-       self.addEventListener("active"  , evt=>{
-       
+       self.addEventListener("activate"  , evt=>{
+          console.log("the Cache is successfully  activated")
+           evt.waitUntil(
+
+               caches.keys()
+               .then(current_cacheName => {
+                   return Promise['all'](
+                    current_cacheName.map(_Cn => {
+                    if (_Cn != current_cacheName){ return caches.delete(_Cn)}    
+                    })
+                   )
+               })
+           )
        
        })
     } , 
     
-    On_fetch () {}  , 
+    On_fetch () {
+    
+        self.addEventListener("fetch" , evt => {
+            
+            console.log("fetching url ::" + evt.request.url) 
+            evt.respondWith(
+                fetch(evt.resquest)
+                .then(res =>  {
+                    const request_clone  = res.clone()
+                    caches.open(CACHE_NAME)
+                    .then(enable_cache => {
+                        enable_cache.put(evt.request , request_clone)
+                    }) 
+                    return res
+                })
+                .catch(()=> caches.match(evt.request).then(res => res))
+        
+             )
+        })
+    }  , 
 
     /**
      * subNameSpace : cacheLaoder  
@@ -45,7 +77,7 @@ let {
     cacheLoader (mainNameSpace) {
     
         let NoEmptyNamespace = false 
-        if (typeof mainNameSpace == "object" ) {
+        if (mainNameSpace) {
         
             let keys_exists = Object.keys(mainNameSpace)  ; 
 
@@ -55,13 +87,14 @@ let {
                 
                 for(let method in mainNameSpace){
                 
-                    (typeof mainNameSpace[method] == "function") ? mainNameSpace[method]() : console.warn("")
+                    (typeof mainNameSpace[method] == "function") ? mainNameSpace[method]() : console.warn(`no module found  on ${mainNameSpace}`)
                 }
             }
-            
-
         }
         
     }
 }
+
 cacheLoader(CACHE_CORE) ; 
+
+
